@@ -157,7 +157,7 @@ THINKINGDATA_QUERY_TOKEN
 | `query_path_analysis` | 查询事件间访问路径 | 事件集合、起点、路径方向 |
 | `query_interval_analysis` | 查询两个事件之间的间隔 | 起始事件、结束事件 |
 | `query_user_property_analysis` | 查询用户属性聚合 | 目标属性、聚合方式 |
-| `execute_sql_query` | 执行只读 SQL 查询并返回 JSON | `sql` |
+| `execute_sql_query` | 执行单条只读 `SELECT`/`WITH … SELECT` 查询并返回 JSON | `sql` |
 | `list_event_metadata` | 列出当前项目事件元数据 | 无参数 |
 | `list_property_metadata` | 列出事件或用户属性元数据 | `table_type`，事件表可带 `event_name` |
 
@@ -166,6 +166,11 @@ THINKINGDATA_QUERY_TOKEN
 
 明确排除：用户列表、全量下载、用户列表下载、SQL 分页、异步 SQL、任务取消、
 分群或标签写入、元数据修改、看板管理、用户管理和项目管理。
+
+`execute_sql_query` 在发送 HTTP 请求前执行保守的只读校验：只接受单条
+`SELECT` 或 `WITH … SELECT`，拒绝分号、SQL 注释以及写入、DDL、权限变更和过程
+调用关键字。无法明确判断为只读的 SQL 会被拒绝；ThinkingData 查询 token 仍应在
+服务端配置为只读权限，作为最终安全边界。
 
 ## Tool search 与能力布局
 

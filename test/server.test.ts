@@ -1,6 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { ThinkingDataClient } from "../src/client.js";
 import { createServer } from "../src/server.js";
 
 const expectedTools = [
@@ -36,6 +37,29 @@ describe("MCP server", () => {
       expect(tool.outputSchema).toBeTruthy();
       expect(tool.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false });
     }
+
+    await client.close();
+    await server.close();
+  });
+
+  it("rejects write SQL before making an HTTP request", async () => {
+    const executeSql = vi.fn();
+    const server = createServer({
+      baseUrl: "https://ta.example.test",
+      projectId: "377",
+      queryToken: "secret-token",
+    }, { executeSql } as unknown as ThinkingDataClient);
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    const response = await client.callTool({
+      name: "execute_sql_query",
+      arguments: { sql: "DELETE FROM events" },
+    });
+
+    expect(response.isError).toBe(true);
+    expect(executeSql).not.toHaveBeenCalled();
 
     await client.close();
     await server.close();

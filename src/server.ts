@@ -5,6 +5,7 @@ import type { ThinkingDataResponse } from "./client.js";
 import { ThinkingDataClient } from "./client.js";
 import { analysisToolSpecs, callAnalysisTool, DOCUMENT_BASE } from "./tools.js";
 import { emptySchema, propertyMetadataSchema, sqlQuerySchema } from "./schemas/tools.js";
+import { assertReadOnlySql } from "./sql.js";
 
 const outputShape = {
   source: z.object({ document_version: z.literal("5.0"), documentation_url: z.string().url(), endpoint: z.string() }),
@@ -60,7 +61,7 @@ export function createServer(config: Config, client = new ThinkingDataClient(con
     inputSchema: sqlQuerySchema,
     outputSchema: outputShape,
     annotations,
-  }, async ({ sql }) => result(await client.executeSql(sql), "data_api", "/open/execute-sql"));
+  }, async ({ sql }) => result(await client.executeSql(assertReadOnlySql(sql)), "data_api", "/open/execute-sql"));
 
   server.registerTool("list_event_metadata", {
     description: "List event metadata for the configured ThinkingData project.",

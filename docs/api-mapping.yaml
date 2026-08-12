@@ -90,6 +90,9 @@ tools:
     request_mapping: { sql: sql, fixed_format: "format=json" }
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
+    sql_policy:
+      allowed_statements: [SELECT, WITH_SELECT]
+      rejects: [multiple_statements, semicolons, comments, DML, DDL, permission_changes, procedure_calls]
     excluded: [分页结果, 异步提交, 任务查询, 任务取消]
 
   - tool: list_event_metadata
