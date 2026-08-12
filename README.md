@@ -4,7 +4,33 @@ ThinkingData 5.0 的本地只读 MCP Server。服务端稳定名称为
 `thinkingdata-readonly`，首版只通过 stdio 运行，仅暴露 10 个面向用户目标的
 只读工具。
 
-> 当前状态：仓库与设计骨架已建立；ThinkingData 5.0 API 映射和实现进行中。
+> 当前状态：首版 10 个只读 tools、stdio 入口、HTTP 客户端、API 映射和基础测试已实现。
+
+## 安装与运行
+
+项目要求 Node.js 18 或更高版本。依赖只安装在当前项目中：
+
+```bash
+npm ci
+npm run build
+```
+
+配置必填环境变量并启动：
+
+```bash
+export THINKINGDATA_BASE_URL="https://your-thinkingdata-host"
+export THINKINGDATA_PROJECT_ID="your-project-id"
+export THINKINGDATA_QUERY_TOKEN="your-query-token"
+npm start
+```
+
+质量检查：
+
+```bash
+npm run typecheck
+npm test
+npm run build
+```
 
 ## 设计原则
 

@@ -1,0 +1,124 @@
+document_version: "5.0"
+language: zh-CN
+last_verified: "2026-08-12"
+base_documentation_url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN"
+
+tools:
+  - tool: query_event_analysis
+    user_goal: 查询事件指标趋势并按属性筛选或分组
+    documentation:
+      code: event_query_api
+      section: 事件分析查询
+      url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=event_query_api&anchorId="
+    endpoint: /open/event-analyze
+    method: POST
+    request_mapping:
+      project_id: projectId
+      time_range: eventView.startTime/endTime 或 eventView.recentDay
+      time_granularity: eventView.timeParticleSize
+      filters: eventView.filts
+      group_by: eventView.groupBy
+      event: events[].eventName
+      metric: events[].analysis
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    official_enums:
+      time_granularity: [minute, minute5, minute10, hour, day, week, month, total]
+      metric: [TOTAL_TIMES, TRIG_USER_NUM, PER_CAPITA_TIMES]
+    readonly: true
+
+  - tool: query_retention_analysis
+    user_goal: 查询初始事件到回访事件的留存
+    documentation: { code: retention_query_api, section: 留存分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=retention_query_api&anchorId=" }
+    endpoint: /open/retention-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: retentionView, initial_event: events[0], returning_event: events[1] }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: query_funnel_analysis
+    user_goal: 查询有序事件步骤的漏斗转化
+    documentation: { code: funnel_query_api, section: 漏斗分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=funnel_query_api&anchorId=" }
+    endpoint: /open/funnel-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: funnelView, conversion_window: funnelView.conversionWindow, steps: events }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: query_distribution_analysis
+    user_goal: 查询事件指标在目标属性上的分布
+    documentation: { code: distribution_query_api, section: 分布分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=" }
+    endpoint: /open/distribution-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: distributionView, event: events[].eventName, metric: events[].analysis, distribution_property: events[].byField }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: query_path_analysis
+    user_goal: 查询指定起点事件前后的行为路径
+    documentation: { code: path_query_api, section: 路径分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=path_query_api&anchorId=" }
+    endpoint: /open/path-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: eventView, events: events.event_names, start_event: events.source_event, direction: events.source_type }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    official_enums: { direction: [initial_event, termination_event] }
+    readonly: true
+
+  - tool: query_interval_analysis
+    user_goal: 查询起始事件与结束事件之间的时间间隔
+    documentation: { code: interval_query_api, section: 间隔分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=interval_query_api&anchorId=" }
+    endpoint: /open/interval-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: intervalView, start_event: events[0], end_event: events[1] }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: query_user_property_analysis
+    user_goal: 查询目标属性的聚合结果
+    documentation: { code: user_prop_query_api, section: 属性分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=user_prop_query_api&anchorId=" }
+    endpoint: /open/user-prop-analyze
+    method: POST
+    request_mapping: { project_id: projectId, time_range: userPropView, property: userProps[].columnName, table_type: userProps[].tableType, aggregation: userProps[].analysis }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: execute_sql_query
+    user_goal: 同步执行一条 SQL 并取得 JSON 结果
+    documentation: { code: data_api, section: 同步执行 SQL, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=data_api&anchorId=" }
+    endpoint: /open/execute-sql
+    method: POST
+    content_type: application/x-www-form-urlencoded
+    request_mapping: { sql: sql, fixed_format: "format=json" }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+    excluded: [分页结果, 异步提交, 任务查询, 任务取消]
+
+  - tool: list_event_metadata
+    user_goal: 列出当前项目的事件元数据
+    documentation: { code: meta_data_manage_api, section: 获取事件列表, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=meta_data_manage_api&anchorId=" }
+    endpoint: /open/list-event-meta
+    method: GET
+    request_mapping: { project_id: projectId }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    readonly: true
+
+  - tool: list_property_metadata
+    user_goal: 列出当前项目的事件属性或用户属性元数据
+    documentation: { code: meta_data_manage_api, section: 获取属性列表, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=meta_data_manage_api&anchorId=" }
+    endpoint: /open/list-props
+    method: GET
+    request_mapping: { project_id: projectId, table_type: tableType, event_name: eventName }
+    response_mapping: { return_code: return_code, return_message: return_message, data: data }
+    official_enums: { table_type: [event, user] }
+    readonly: true
+
+common:
+  authentication:
+    query_parameter: token
+    source: THINKINGDATA_QUERY_TOKEN
+    exposed_as_tool_input: false
+  project:
+    source: THINKINGDATA_PROJECT_ID
+    exposed_as_tool_input: false
+  errors:
+    fields: [return_code, return_message]
+    success_return_code: 0
