@@ -17,6 +17,35 @@ describe("request mapping", () => {
     expect(spec.path).toBe("/open/event-analyze");
   });
 
+  it("maps retention analysis and global filters to the official method body", () => {
+    const spec = analysisToolSpecs.query_retention_analysis;
+    expect(spec.map(spec.schema.parse({
+      initial_event: { name: "register" },
+      returning_event: { name: "login" },
+      time_range: { recent_day: "1-7" },
+      time_granularity: "day",
+      unit_num: 7,
+      filters: [{
+        property: { name: "app_version", table_type: "event" },
+        comparator: "equal",
+        values: ["1.0"],
+      }],
+    }), "377")).toEqual({
+      projectId: "377",
+      eventView: {
+        recentDay: "1-7",
+        filts: [{ columnName: "app_version", tableType: "event", comparator: "equal", ftv: ["1.0"] }],
+        statType: "retention",
+        timeParticleSize: "day",
+        unitNum: 7,
+      },
+      events: [
+        { eventName: "register", type: "first" },
+        { eventName: "login", type: "second" },
+      ],
+    });
+  });
+
   it("maps path direction and event collection", () => {
     const spec = analysisToolSpecs.query_path_analysis;
     expect(spec.map(spec.schema.parse({

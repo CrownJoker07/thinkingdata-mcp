@@ -24,6 +24,9 @@ export const retentionAnalysisSchema = z.object({
   initial_event: eventReferenceSchema,
   returning_event: eventReferenceSchema,
   time_range: timeRangeSchema,
+  time_granularity: z.enum(["day", "week", "month"]),
+  unit_num: z.number().int().positive(),
+  filters: z.array(filterSchema).optional(),
 }).strict();
 
 export const funnelAnalysisSchema = z.object({

@@ -31,7 +31,10 @@ tools:
     documentation: { code: retention_query_api, section: 留存分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=retention_query_api&anchorId=" }
     endpoint: /open/retention-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: retentionView, initial_event: events[0], returning_event: events[1] }
+    request_mapping: { project_id: projectId, time_range: eventView, filters: eventView.filts, time_granularity: eventView.timeParticleSize, unit_num: eventView.unitNum, initial_event: events[0], returning_event: events[1] }
+    fixed_mapping: { stat_type: { target: eventView.statType, value: retention }, initial_event_type: { target: events[0].type, value: first }, returning_event_type: { target: events[1].type, value: second } }
+    official_enums:
+      time_granularity: [day, week, month]
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
 

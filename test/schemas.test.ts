@@ -3,6 +3,7 @@ import {
   eventAnalysisSchema,
   funnelAnalysisSchema,
   propertyMetadataSchema,
+  retentionAnalysisSchema,
 } from "../src/schemas/tools.js";
 
 describe("tool input schemas", () => {
@@ -36,6 +37,26 @@ describe("tool input schemas", () => {
   it("requires at least two funnel steps", () => {
     expect(funnelAnalysisSchema.safeParse({
       steps: [{ name: "login" }], conversion_window: { value: 1, unit: "day" }, time_range: { recent_day: "1-7" },
+    }).success).toBe(false);
+  });
+
+  it("accepts retention analysis filters and requires its period", () => {
+    expect(retentionAnalysisSchema.safeParse({
+      initial_event: { name: "register" },
+      returning_event: { name: "login" },
+      time_range: { recent_day: "1-7" },
+      time_granularity: "day",
+      unit_num: 7,
+      filters: [{
+        property: { name: "app_version", table_type: "event" },
+        comparator: "equal",
+        values: ["1.0"],
+      }],
+    }).success).toBe(true);
+    expect(retentionAnalysisSchema.safeParse({
+      initial_event: { name: "register" },
+      returning_event: { name: "login" },
+      time_range: { recent_day: "1-7" },
     }).success).toBe(false);
   });
 

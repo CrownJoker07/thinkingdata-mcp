@@ -45,8 +45,16 @@ export const analysisToolSpecs = {
     schema: retentionAnalysisSchema,
     map: (input: z.infer<typeof retentionAnalysisSchema>, projectId: string) => ({
       projectId,
-      retentionView: mapTimeRange(input.time_range),
-      events: [{ eventName: input.initial_event.name }, { eventName: input.returning_event.name }],
+      eventView: {
+        ...eventView(input.time_range, input.filters),
+        statType: "retention",
+        timeParticleSize: input.time_granularity,
+        unitNum: input.unit_num,
+      },
+      events: [
+        { eventName: input.initial_event.name, type: "first" },
+        { eventName: input.returning_event.name, type: "second" },
+      ],
     }),
   },
   query_funnel_analysis: {
