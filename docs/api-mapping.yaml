@@ -1,6 +1,6 @@
 document_version: "5.0"
 language: zh-CN
-last_verified: "2026-08-12"
+last_verified: "2026-08-18"
 base_documentation_url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN"
 
 tools:
@@ -43,7 +43,9 @@ tools:
     documentation: { code: funnel_query_api, section: 漏斗分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=funnel_query_api&anchorId=" }
     endpoint: /open/funnel-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: funnelView, conversion_window: funnelView.conversionWindow, steps: events }
+    request_mapping: { project_id: projectId, time_range: eventView, filters: eventView.filts, conversion_window_value: eventView.windows_gap, conversion_window_unit: eventView.windows_gap_tu, steps: events }
+    official_enums:
+      conversion_window_unit: [second, minute, hour, day, week, month]
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
 
@@ -52,7 +54,10 @@ tools:
     documentation: { code: distribution_query_api, section: 分布分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=" }
     endpoint: /open/distribution-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: distributionView, event: events[].eventName, metric: events[].analysis, distribution_property: events[].byField }
+    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, event: events[].eventName, metric: events[].analysis, distribution_property: events[].quota }
+    fixed_mapping: { event_type: { target: events[0].type, value: normal } }
+    official_enums:
+      time_granularity: [day, week, month, total]
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
 
@@ -61,9 +66,9 @@ tools:
     documentation: { code: path_query_api, section: 路径分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=path_query_api&anchorId=" }
     endpoint: /open/path-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: eventView, events: events.event_names, start_event: events.source_event, direction: events.source_type }
+    request_mapping: { project_id: projectId, absolute_time_range: eventView.from_date/to_date, relative_time_range: eventView.recent_day, column_limit: eventView.col_limit, session_window_value: eventView.session_interval, session_window_unit: eventView.session_type, events: events.event_names, start_event: events.source_event, direction: events.source_type }
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
-    official_enums: { direction: [initial_event, termination_event] }
+    official_enums: { direction: [initial_event, termination_event], session_window_unit: [second, minute, hour] }
     readonly: true
 
   - tool: query_interval_analysis
@@ -71,7 +76,10 @@ tools:
     documentation: { code: interval_query_api, section: 间隔分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=interval_query_api&anchorId=" }
     endpoint: /open/interval-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: intervalView, start_event: events[0], end_event: events[1] }
+    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, start_event: events[0], end_event: events[1] }
+    fixed_mapping: { start_event_type: { target: events[0].type, value: first }, end_event_type: { target: events[1].type, value: second } }
+    official_enums:
+      time_granularity: [minute, hour, day, week, month, total]
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
 
@@ -80,7 +88,10 @@ tools:
     documentation: { code: user_prop_query_api, section: 属性分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=user_prop_query_api&anchorId=" }
     endpoint: /open/user-prop-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: userPropView, property: userProps[].columnName, table_type: userProps[].tableType, aggregation: userProps[].analysis }
+    request_mapping: { project_id: projectId, property: events[].quota, table_type: events[].tableType, aggregation: events[].analysis }
+    fixed_mapping: { event_view: { target: eventView, value: {} } }
+    official_enums:
+      aggregation: [TRIG_USER_NUM, SUM, AVG, MAX, MIN, DISTINCT, TRUE, FALSE, IS_NOT_EMPTY, IS_EMPTY, ARRAY_DISTINCT, ARRAY_SET_DISTINCT, ARRAY_ITEM_DISTINCT, MEDIAN, PERCENTILE]
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     readonly: true
 
@@ -128,3 +139,8 @@ common:
   errors:
     fields: [return_code, return_message]
     success_return_code: 0
+  filters:
+    target: eventView.filts
+    table_types: [event, user, cluster]
+    relative_event_time_units: [minute, hour, day]
+    comparators: [equal, notEqual, isTrue, isFalse, isNull, notNull, include, notInclude, less, greater, range, regexMatch, notRegexMatch, relativeCurrentBetween, relativeCurrentBefore, relativeEventBefore, relativeEventAfter, relativeEventAbsolute, arrayIncludeItem, arrayNotIncludeItem, arrayItemPos, arrayIsNull, arrayNotNull]

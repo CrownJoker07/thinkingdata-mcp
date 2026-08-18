@@ -153,11 +153,11 @@ THINKINGDATA_QUERY_TOKEN
 | --- | --- | --- |
 | `query_event_analysis` | 查询事件指标趋势 | 指标、时间粒度、筛选、分组 |
 | [`query_retention_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=retention_query_api&anchorId=) | 查询初始事件后的回访留存 | 初始事件、回访事件、时间范围、时间粒度、留存期限、筛选 |
-| `query_funnel_analysis` | 查询有序步骤转化 | 有序步骤、转化窗口、筛选 |
-| `query_distribution_analysis` | 查询指标在属性上的分布 | 事件、指标、分布属性 |
-| `query_path_analysis` | 查询事件间访问路径 | 事件集合、起点、路径方向 |
-| `query_interval_analysis` | 查询两个事件之间的间隔 | 起始事件、结束事件 |
-| `query_user_property_analysis` | 查询用户属性聚合 | 目标属性、聚合方式 |
+| [`query_funnel_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=funnel_query_api&anchorId=) | 查询有序步骤转化 | 有序步骤、转化窗口、筛选 |
+| [`query_distribution_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=) | 查询指标在属性上的分布 | 事件、指标、分布属性、时间粒度 |
+| [`query_path_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=path_query_api&anchorId=) | 查询事件间访问路径 | 事件集合、起点、路径方向、列数、会话窗口 |
+| [`query_interval_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=interval_query_api&anchorId=) | 查询两个事件之间的间隔 | 起始事件、结束事件、时间粒度 |
+| [`query_user_property_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=user_prop_query_api&anchorId=) | 查询用户属性聚合 | 目标属性、聚合方式 |
 | `execute_sql_query` | 执行单条只读 `SELECT`/`WITH … SELECT` 查询并返回 JSON | `sql` |
 | `list_event_metadata` | 列出当前项目事件元数据 | 无参数 |
 | `list_property_metadata` | 列出事件或用户属性元数据 | `table_type`，事件表可带 `event_name` |
@@ -172,6 +172,11 @@ THINKINGDATA_QUERY_TOKEN
 `SELECT` 或 `WITH … SELECT`，拒绝分号、SQL 注释以及写入、DDL、权限变更和过程
 调用关键字。无法明确判断为只读的 SQL 会被拒绝；ThinkingData 查询 token 仍应在
 服务端配置为只读权限，作为最终安全边界。
+
+TA SQL 使用双引号引用标识符，不支持反引号。事件表和用户表使用当前项目实际存在的
+`v_event_<projectId>`、`v_user_<projectId>`，不要假设存在 `default_event` 或
+`default_user`；查询前应通过元数据工具确认事件、属性及其数据类型。字符串属性应使用
+`DISTINCT`、`IS_NOT_EMPTY` 等兼容的属性聚合，不能使用 `SUM` 或 `AVG`。
 
 ## Tool search 与能力布局
 

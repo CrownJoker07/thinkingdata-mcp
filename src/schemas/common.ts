@@ -17,20 +17,37 @@ export const timeRangeSchema = z.union([
 export const comparatorSchema = z.enum([
   "equal",
   "notEqual",
+  "isTrue",
+  "isFalse",
+  "isNull",
+  "notNull",
   "include",
   "notInclude",
   "less",
   "greater",
-  "lessEqual",
-  "greaterEqual",
-  "isNull",
-  "notNull",
+  "range",
+  "regexMatch",
+  "notRegexMatch",
+  "relativeCurrentBetween",
+  "relativeCurrentBefore",
+  "relativeEventBefore",
+  "relativeEventAfter",
+  "relativeEventAbsolute",
+  "arrayIncludeItem",
+  "arrayNotIncludeItem",
+  "arrayItemPos",
+  "arrayIsNull",
+  "arrayNotNull",
 ]);
 
 export const filterSchema = z.object({
-  property: propertyReferenceSchema,
+  property: z.object({
+    name: z.string().min(1),
+    table_type: z.enum(["event", "user", "cluster"]),
+  }).strict(),
   comparator: comparatorSchema,
-  values: z.array(z.string()),
+  values: z.array(z.union([z.string(), z.number()])),
+  time_unit: z.enum(["minute", "hour", "day"]).optional(),
 }).strict();
 
 export const groupPropertySchema = propertyReferenceSchema;
@@ -47,8 +64,10 @@ export function mapProperty(property: z.infer<typeof propertyReferenceSchema>) {
 
 export function mapFilter(filter: z.infer<typeof filterSchema>) {
   return {
-    ...mapProperty(filter.property),
+    columnName: filter.property.name,
+    tableType: filter.property.table_type,
     comparator: filter.comparator,
     ftv: filter.values,
+    ...(filter.time_unit === undefined ? {} : { timeUnit: filter.time_unit }),
   };
 }

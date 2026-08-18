@@ -23,7 +23,7 @@ const descriptions: Record<keyof typeof analysisToolSpecs, string> = {
   query_distribution_analysis: "Query how an event metric is distributed over a property.",
   query_path_analysis: "Query paths around a selected starting event.",
   query_interval_analysis: "Query elapsed intervals between a start and end event.",
-  query_user_property_analysis: "Query an aggregation over a user or event property.",
+  query_user_property_analysis: "Query an aggregation over a user or event property. Use property metadata to choose an aggregation compatible with the property's data type; for example, use DISTINCT rather than numeric SUM or AVG for a string property.",
 };
 
 function result(response: ThinkingDataResponse, code: string, endpoint: string) {
@@ -57,7 +57,7 @@ export function createServer(config: Config, client = new ThinkingDataClient(con
   }
 
   server.registerTool("execute_sql_query", {
-    description: "Execute one synchronous SQL query and return JSON results.",
+    description: "Execute one synchronous TA SQL SELECT or WITH query and return JSON results. Quote identifiers with double quotes, never backticks. Use metadata and the project's actual v_event_<projectId> or v_user_<projectId> table; do not assume default_event or default_user exists.",
     inputSchema: sqlQuerySchema,
     outputSchema: outputShape,
     annotations,

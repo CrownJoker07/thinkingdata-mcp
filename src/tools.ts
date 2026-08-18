@@ -19,7 +19,7 @@ export type ToolSpec = {
   map: (input: never, projectId: string) => unknown;
 };
 
-const eventView = (timeRange: Parameters<typeof mapTimeRange>[0], filters?: Parameters<typeof mapFilter>[0][]) => ({
+const mapEventView = (timeRange: Parameters<typeof mapTimeRange>[0], filters?: Parameters<typeof mapFilter>[0][]) => ({
   ...mapTimeRange(timeRange),
   ...(filters ? { filts: filters.map(mapFilter) } : {}),
 });
@@ -32,7 +32,7 @@ export const analysisToolSpecs = {
     map: (input: z.infer<typeof eventAnalysisSchema>, projectId: string) => ({
       projectId,
       eventView: {
-        ...eventView(input.time_range, input.filters),
+        ...mapEventView(input.time_range, input.filters),
         timeParticleSize: input.time_granularity,
         ...(input.group_by ? { groupBy: input.group_by.map(mapProperty) } : {}),
       },
@@ -46,7 +46,7 @@ export const analysisToolSpecs = {
     map: (input: z.infer<typeof retentionAnalysisSchema>, projectId: string) => ({
       projectId,
       eventView: {
-        ...eventView(input.time_range, input.filters),
+        ...mapEventView(input.time_range, input.filters),
         statType: "retention",
         timeParticleSize: input.time_granularity,
         unitNum: input.unit_num,
@@ -63,10 +63,10 @@ export const analysisToolSpecs = {
     schema: funnelAnalysisSchema,
     map: (input: z.infer<typeof funnelAnalysisSchema>, projectId: string) => ({
       projectId,
-      funnelView: {
-        ...eventView(input.time_range, input.filters),
-        conversionWindow: input.conversion_window.value,
-        windowUnit: input.conversion_window.unit,
+      eventView: {
+        ...mapEventView(input.time_range, input.filters),
+        windows_gap: input.conversion_window.value,
+        windows_gap_tu: input.conversion_window.unit,
       },
       events: input.steps.map((step) => ({ eventName: step.name })),
     }),
@@ -77,8 +77,16 @@ export const analysisToolSpecs = {
     schema: distributionAnalysisSchema,
     map: (input: z.infer<typeof distributionAnalysisSchema>, projectId: string) => ({
       projectId,
-      distributionView: mapTimeRange(input.time_range),
-      events: [{ eventName: input.event.name, analysis: input.metric, byField: mapProperty(input.distribution_property) }],
+      eventView: {
+        ...mapTimeRange(input.time_range),
+        timeParticleSize: input.time_granularity,
+      },
+      events: [{
+        eventName: input.event.name,
+        analysis: input.metric,
+        quota: input.distribution_property.name,
+        type: "normal",
+      }],
     }),
   },
   query_path_analysis: {
@@ -87,7 +95,14 @@ export const analysisToolSpecs = {
     schema: pathAnalysisSchema,
     map: (input: z.infer<typeof pathAnalysisSchema>, projectId: string) => ({
       projectId,
-      eventView: mapTimeRange(input.time_range),
+      eventView: {
+        ...("recent_day" in input.time_range
+          ? { recent_day: input.time_range.recent_day }
+          : { from_date: input.time_range.start_time, to_date: input.time_range.end_time }),
+        col_limit: input.column_limit,
+        session_interval: input.session_window.value,
+        session_type: input.session_window.unit,
+      },
       events: {
         event_names: input.events.map((event) => event.name),
         source_event: { event_name: input.start_event.name },
@@ -101,8 +116,14 @@ export const analysisToolSpecs = {
     schema: intervalAnalysisSchema,
     map: (input: z.infer<typeof intervalAnalysisSchema>, projectId: string) => ({
       projectId,
-      intervalView: mapTimeRange(input.time_range),
-      events: [{ eventName: input.start_event.name }, { eventName: input.end_event.name }],
+      eventView: {
+        ...mapTimeRange(input.time_range),
+        timeParticleSize: input.time_granularity,
+      },
+      events: [
+        { eventName: input.start_event.name, type: "first" },
+        { eventName: input.end_event.name, type: "second" },
+      ],
     }),
   },
   query_user_property_analysis: {
@@ -111,8 +132,12 @@ export const analysisToolSpecs = {
     schema: userPropertyAnalysisSchema,
     map: (input: z.infer<typeof userPropertyAnalysisSchema>, projectId: string) => ({
       projectId,
-      userPropView: mapTimeRange(input.time_range),
-      userProps: [{ ...mapProperty(input.property), analysis: input.aggregation }],
+      eventView: {},
+      events: [{
+        analysis: input.aggregation,
+        quota: input.property.name,
+        tableType: input.property.table_type,
+      }],
     }),
   },
 } as const;
