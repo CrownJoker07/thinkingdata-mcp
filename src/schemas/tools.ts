@@ -42,7 +42,6 @@ export const funnelAnalysisSchema = z.object({
 export const distributionAnalysisSchema = z.object({
   event: eventReferenceSchema,
   metric: metricSchema,
-  distribution_property: z.object({ name: z.string().min(1) }).strict(),
   time_range: timeRangeSchema,
   time_granularity: z.enum(["day", "week", "month", "total"]),
 }).strict();

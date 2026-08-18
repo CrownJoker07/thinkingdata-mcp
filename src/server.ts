@@ -20,7 +20,7 @@ const descriptions: Record<keyof typeof analysisToolSpecs, string> = {
   query_event_analysis: "Query event metrics over time with optional filters and grouping.",
   query_retention_analysis: "Query retention from an initial event to a returning event.",
   query_funnel_analysis: "Query conversion across an ordered sequence of event steps.",
-  query_distribution_analysis: "Query how an event metric is distributed over a property.",
+  query_distribution_analysis: "Query the distribution of an event metric. The supported count-based metrics do not take a property; use query_event_analysis group_by to break results down by a property.",
   query_path_analysis: "Query paths around a selected starting event.",
   query_interval_analysis: "Query elapsed intervals between a start and end event.",
   query_user_property_analysis: "Query an aggregation over a user or event property. Use property metadata to choose an aggregation compatible with the property's data type; for example, use DISTINCT rather than numeric SUM or AVG for a string property.",

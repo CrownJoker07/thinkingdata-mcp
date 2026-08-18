@@ -50,11 +50,11 @@ tools:
     readonly: true
 
   - tool: query_distribution_analysis
-    user_goal: 查询事件指标在目标属性上的分布
+    user_goal: 查询事件指标的分布
     documentation: { code: distribution_query_api, section: 分布分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=" }
     endpoint: /open/distribution-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, event: events[].eventName, metric: events[].analysis, distribution_property: events[].quota }
+    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, event: events[].eventName, metric: events[].analysis }
     fixed_mapping: { event_type: { target: events[0].type, value: normal } }
     official_enums:
       time_granularity: [day, week, month, total]

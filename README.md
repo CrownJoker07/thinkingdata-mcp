@@ -154,7 +154,7 @@ THINKINGDATA_QUERY_TOKEN
 | `query_event_analysis` | 查询事件指标趋势 | 指标、时间粒度、筛选、分组 |
 | [`query_retention_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=retention_query_api&anchorId=) | 查询初始事件后的回访留存 | 初始事件、回访事件、时间范围、时间粒度、留存期限、筛选 |
 | [`query_funnel_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=funnel_query_api&anchorId=) | 查询有序步骤转化 | 有序步骤、转化窗口、筛选 |
-| [`query_distribution_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=) | 查询指标在属性上的分布 | 事件、指标、分布属性、时间粒度 |
+| [`query_distribution_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=) | 查询事件指标的分布 | 事件、指标、时间范围、时间粒度 |
 | [`query_path_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=path_query_api&anchorId=) | 查询事件间访问路径 | 事件集合、起点、路径方向、列数、会话窗口 |
 | [`query_interval_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=interval_query_api&anchorId=) | 查询两个事件之间的间隔 | 起始事件、结束事件、时间粒度 |
 | [`query_user_property_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=user_prop_query_api&anchorId=) | 查询用户属性聚合 | 目标属性、聚合方式 |

@@ -84,7 +84,6 @@ export const analysisToolSpecs = {
       events: [{
         eventName: input.event.name,
         analysis: input.metric,
-        quota: input.distribution_property.name,
         type: "normal",
       }],
     }),
