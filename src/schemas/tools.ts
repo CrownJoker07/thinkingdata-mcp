@@ -44,6 +44,7 @@ export const distributionAnalysisSchema = z.object({
   metric: metricSchema,
   time_range: timeRangeSchema,
   time_granularity: z.enum(["day", "week", "month", "total"]),
+  filters: z.array(filterSchema).optional(),
 }).strict();
 
 export const pathAnalysisSchema = z.object({

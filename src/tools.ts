@@ -85,6 +85,7 @@ export const analysisToolSpecs = {
         eventName: input.event.name,
         analysis: input.metric,
         type: "normal",
+        ...(input.filters ? { filts: input.filters.map(mapFilter), relation: "and" } : {}),
       }],
     }),
   },

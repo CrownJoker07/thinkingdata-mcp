@@ -54,7 +54,7 @@ tools:
     documentation: { code: distribution_query_api, section: 分布分析查询, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=" }
     endpoint: /open/distribution-analyze
     method: POST
-    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, event: events[].eventName, metric: events[].analysis }
+    request_mapping: { project_id: projectId, time_range: eventView, time_granularity: eventView.timeParticleSize, event: events[].eventName, metric: events[].analysis, filters: events[].filts }
     fixed_mapping: { event_type: { target: events[0].type, value: normal } }
     official_enums:
       time_granularity: [day, week, month, total]
