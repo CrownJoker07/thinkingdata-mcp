@@ -85,7 +85,7 @@ Schema。`outputSchema` 一旦声明，服务端返回的 `structuredContent` �
   "content": [
     {
       "type": "text",
-      "text": "事件分析查询成功。"
+      "text": "{\n  \"source\": { ... },\n  \"return_code\": 0,\n  \"return_message\": \"success\",\n  \"data\": {}\n}"
     }
   ],
   "structuredContent": {
@@ -107,7 +107,8 @@ Schema。`outputSchema` 一旦声明，服务端返回的 `structuredContent` �
 - `description` 说明用户目标以及何时选择该工具，用于提高模型选取准确率。
 - `inputSchema` 明确必填项、类型、枚举、互斥关系和限制。
 - `outputSchema` 描述可复用的结构化结果。
-- `content` 保持简短；详细机器可读数据放入 `structuredContent`。
+- 为兼容不展示 `structuredContent` 的 MCP Host，完整结果同时以 JSON 文本写入
+  `content`。
 - annotations 必须与真实行为一致，不能代替服务端授权和输入校验。
 - 本项目所有工具均为只读，因此使用 `readOnlyHint: true`、
   `destructiveHint: false`。查询会访问配置的 ThinkingData 服务，但不改变其状态。

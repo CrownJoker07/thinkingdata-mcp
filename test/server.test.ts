@@ -64,4 +64,38 @@ describe("MCP server", () => {
     await client.close();
     await server.close();
   });
+
+  it("returns the complete structured result in text content", async () => {
+    const get = vi.fn().mockResolvedValue({
+      return_code: 0,
+      return_message: "success",
+      data: { events: [{ name: "login" }] },
+    });
+    const server = createServer({
+      baseUrl: "https://ta.example.test",
+      projectId: "3",
+      queryToken: "secret-token",
+    }, { get } as unknown as ThinkingDataClient);
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    const response = await client.callTool({
+      name: "list_event_metadata",
+      arguments: {},
+    });
+
+    expect(response.content).toHaveLength(1);
+    expect(response.content[0]).toMatchObject({ type: "text" });
+    if (response.content[0].type !== "text") throw new Error("Expected text content");
+    expect(JSON.parse(response.content[0].text)).toEqual(response.structuredContent);
+    expect(response.structuredContent).toMatchObject({
+      return_code: 0,
+      return_message: "success",
+      data: { events: [{ name: "login" }] },
+    });
+
+    await client.close();
+    await server.close();
+  });
 });

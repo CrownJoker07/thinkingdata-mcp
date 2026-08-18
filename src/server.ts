@@ -38,7 +38,7 @@ function result(response: ThinkingDataResponse, code: string, endpoint: string) 
     ...(response.data === undefined ? {} : { data: response.data }),
   };
   return {
-    content: [{ type: "text" as const, text: response.return_code === 0 ? "ThinkingData query succeeded." : `ThinkingData query failed: ${response.return_message}` }],
+    content: [{ type: "text" as const, text: JSON.stringify(structuredContent, null, 2) }],
     structuredContent,
     isError: response.return_code !== 0,
   };
