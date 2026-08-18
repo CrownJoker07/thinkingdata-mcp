@@ -193,7 +193,6 @@ thinkingdata-mcp/
 │   ├── client.ts              # ThinkingData HTTP 客户端与凭据隔离
 │   ├── schemas/               # 共享结构和各分析独立 schema
 │   └── tools/                 # tool 到 HTTP 请求的业务映射
-├── test/
 │   ├── fixtures/              # ThinkingData 5.0 官方示例映射 fixture
 │   ├── schemas/               # 合法、缺失、非法枚举、互斥范围测试
 │   ├── tools/                 # 请求映射、响应和 tool 选择测试
