@@ -42,6 +42,8 @@ npm run build
   或自动抓取文档。
 - ThinkingData API 的字段、枚举和限制以固定版本 5.0 的官方文档为准，并记录在
   `docs/api-mapping.yaml`。
+- 本服务只提供 MCP tools，不提供 resources；事件和属性元数据分别通过
+  `list_event_metadata`、`list_property_metadata` 获取。
 
 这些选择遵循 OpenAI 的建议：tool 应帮助完成一个用户目标，相关操作组成一个连贯
 动作，而权限、风险或确认要求不同的操作应拆开。完整 contract 应明确名称、描述、
@@ -168,14 +170,14 @@ THINKINGDATA_QUERY_TOKEN
 明确排除：用户列表、全量下载、用户列表下载、SQL 分页、异步 SQL、任务取消、
 分群或标签写入、元数据修改、看板管理、用户管理和项目管理。
 
-`execute_sql_query` 在发送 HTTP 请求前执行保守的只读校验：只接受单条
-`SELECT` 或 `WITH … SELECT`，拒绝分号、SQL 注释以及写入、DDL、权限变更和过程
-调用关键字。无法明确判断为只读的 SQL 会被拒绝；ThinkingData 查询 token 仍应在
-服务端配置为只读权限，作为最终安全边界。
+`execute_sql_query` 在发送 HTTP 请求前执行保守的只读校验：接受原始 SQL 或单个
+Markdown SQL 代码块中的单条 `SELECT` 或 `WITH … SELECT`，拒绝分号、SQL 注释以及
+写入、DDL、权限变更和过程调用关键字。无法明确判断为只读的 SQL 会被拒绝；
+ThinkingData 查询 token 仍应在服务端配置为只读权限，作为最终安全边界。
 
-TA SQL 使用双引号引用标识符，不支持反引号。事件表和用户表使用当前项目实际存在的
-`v_event_<projectId>`、`v_user_<projectId>`，不要假设存在 `default_event` 或
-`default_user`；查询前应通过元数据工具确认事件、属性及其数据类型。字符串属性应使用
+TA SQL 使用双引号引用标识符，不支持反引号。MCP 会在 SQL 工具描述中给出当前配置的
+确切事件表 `v_event_<projectId>` 和用户表 `v_user_<projectId>`，不要自行缩写表名，也
+不要假设存在 `default_event` 或 `default_user`；查询前应通过元数据工具确认事件、属性及其数据类型。字符串属性应使用
 `DISTINCT`、`IS_NOT_EMPTY` 等兼容的属性聚合，不能使用 `SUM` 或 `AVG`。
 
 ## Tool search 与能力布局

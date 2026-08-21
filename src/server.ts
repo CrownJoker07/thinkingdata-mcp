@@ -45,7 +45,14 @@ function result(response: ThinkingDataResponse, code: string, endpoint: string) 
 }
 
 export function createServer(config: Config, client = new ThinkingDataClient(config)) {
-  const server = new McpServer({ name: "thinkingdata-readonly", version: "0.1.0" });
+  const server = new McpServer(
+    { name: "thinkingdata-readonly", version: "0.1.0" },
+    {
+      instructions: "This server exposes tools only and does not provide MCP resources. Do not call resources/list or resources/read for this server. Use list_event_metadata and list_property_metadata for ThinkingData metadata, and use the query tools for analysis.",
+    },
+  );
+  const eventTable = `v_event_${config.projectId}`;
+  const userTable = `v_user_${config.projectId}`;
 
   for (const [name, spec] of Object.entries(analysisToolSpecs) as [keyof typeof analysisToolSpecs, (typeof analysisToolSpecs)[keyof typeof analysisToolSpecs]][]) {
     server.registerTool(name, {
@@ -57,7 +64,7 @@ export function createServer(config: Config, client = new ThinkingDataClient(con
   }
 
   server.registerTool("execute_sql_query", {
-    description: "Execute one synchronous TA SQL SELECT or WITH query and return JSON results. Quote identifiers with double quotes, never backticks. Use metadata and the project's actual v_event_<projectId> or v_user_<projectId> table; do not assume default_event or default_user exists.",
+    description: `Execute one synchronous TA SQL SELECT or WITH query and return JSON results. Pass raw SQL without Markdown code fences. Quote identifiers with double quotes, never backticks. The configured project's event table is ${eventTable} and its user table is ${userTable}; use these exact table names and do not invent, shorten, or otherwise derive table names. Use the metadata tools to confirm event names, properties, and data types before querying.`,
     inputSchema: sqlQuerySchema,
     outputSchema: outputShape,
     annotations,

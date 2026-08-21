@@ -21,6 +21,7 @@ export type ToolSpec = {
 
 const mapEventView = (timeRange: Parameters<typeof mapTimeRange>[0], filters?: Parameters<typeof mapFilter>[0][]) => ({
   ...mapTimeRange(timeRange),
+  relation: "and",
   ...(filters ? { filts: filters.map(mapFilter) } : {}),
 });
 

@@ -2,7 +2,9 @@ const forbiddenSqlKeyword =
   /\b(INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE|REPLACE|GRANT|REVOKE|CALL|EXECUTE|SET|RESET|USE|REFRESH|OPTIMIZE|ANALYZE|COMMENT)\b/i;
 
 export function assertReadOnlySql(sql: string): string {
-  const normalized = sql.trim();
+  let normalized = sql.trim();
+  const fencedSql = /^```(?:sql)?\s*\n([\s\S]*?)\n```$/i.exec(normalized);
+  if (fencedSql) normalized = fencedSql[1].trim();
 
   if (normalized.includes(";")) {
     throw new Error("SQL must contain exactly one statement without a semicolon");
