@@ -9,6 +9,7 @@ import {
 } from "./common.js";
 
 export const metricSchema = z.enum(["TOTAL_TIMES", "TRIG_USER_NUM", "PER_CAPITA_TIMES"]);
+export const distributionMetricSchema = z.enum(["TIMES", "NUMBER_OF_DAYS", "NUMBER_OF_HOURS"]);
 export const timeGranularitySchema = z.enum(["minute", "minute5", "minute10", "hour", "day", "week", "month", "total"]);
 
 export const eventAnalysisSchema = z.object({
@@ -41,7 +42,7 @@ export const funnelAnalysisSchema = z.object({
 
 export const distributionAnalysisSchema = z.object({
   event: eventReferenceSchema,
-  metric: metricSchema,
+  metric: distributionMetricSchema,
   time_range: timeRangeSchema,
   time_granularity: z.enum(["day", "week", "month", "total"]),
   filters: z.array(filterSchema).optional(),
