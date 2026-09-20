@@ -170,8 +170,8 @@ THINKINGDATA_QUERY_TOKEN
 明确排除：用户列表、全量下载、用户列表下载、任务取消、
 分群或标签写入、元数据修改、看板管理、用户管理和项目管理。
 
-`execute_sql_query` 在发送 HTTP 请求前执行保守的只读校验，并自动等待异步 SQL 任务完成、
-拉取全部结果页后再返回实际 `rows`：接受原始 SQL 或单个
+`execute_sql_query` 在发送 HTTP 请求前执行保守的只读校验，并根据分页查询返回的
+`pageCount` 直接拉取全部结果页后再返回实际 `rows`：接受原始 SQL 或单个
 Markdown SQL 代码块中的单条 `SELECT` 或 `WITH … SELECT`，拒绝分号、SQL 注释以及
 写入、DDL、权限变更和过程调用关键字。无法明确判断为只读的 SQL 会被拒绝；
 ThinkingData 查询 token 仍应在服务端配置为只读权限，作为最终安全边界。
