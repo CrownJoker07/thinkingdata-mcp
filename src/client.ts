@@ -11,6 +11,31 @@ const sqlFailure = (code: number, message: string, taskId?: string): ThinkingDat
   return_message: `${message}${taskId ? ` (taskId=${taskId})` : ""}`,
 });
 
+const networkErrorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) return String(error);
+
+  const cause = error.cause;
+  if (!cause || typeof cause !== "object") return error.message;
+
+  const details = cause as {
+    message?: unknown;
+    code?: unknown;
+    errno?: unknown;
+    syscall?: unknown;
+    address?: unknown;
+    port?: unknown;
+  };
+  const fields = [
+    ["code", details.code],
+    ["errno", details.errno],
+    ["syscall", details.syscall],
+    ["address", details.address],
+    ["port", details.port],
+  ].filter(([, value]) => value !== undefined).map(([name, value]) => `${name}=${String(value)}`);
+  const causeMessage = details.message ? String(details.message) : String(cause);
+  return `${error.message}; cause: ${causeMessage}${fields.length > 0 ? ` (${fields.join(", ")})` : ""}`;
+};
+
 export class ThinkingDataClient {
   constructor(
     private readonly config: Config,
@@ -37,14 +62,19 @@ export class ThinkingDataClient {
   private async querySql(body: URLSearchParams): Promise<ThinkingDataResponse> {
     const url = new URL("/querySql", this.config.baseUrl);
     url.searchParams.set("token", this.config.queryToken);
-    const response = await this.request(url, {
-      method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-        accept: "application/json",
-      },
-      body,
-    });
+    let response: Response;
+    try {
+      response = await this.request(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+          accept: "application/json",
+        },
+        body,
+      });
+    } catch (error) {
+      throw new Error(`ThinkingData network request failed: ${networkErrorMessage(error)}`);
+    }
     if (!response.ok) throw new Error(`ThinkingData HTTP error: ${response.status} ${response.statusText}`);
     const lines = (await response.text()).split("\n").map((line) => line.trim()).filter(Boolean);
     if (lines.length === 0) throw new Error("ThinkingData returned an empty SQL response");
@@ -80,7 +110,7 @@ export class ThinkingDataClient {
     try {
       response = await this.request(url, init);
     } catch (error) {
-      throw new Error(`ThinkingData network request failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`ThinkingData network request failed: ${networkErrorMessage(error)}`);
     }
     if (!response.ok) throw new Error(`ThinkingData HTTP error: ${response.status} ${response.statusText}`);
 
