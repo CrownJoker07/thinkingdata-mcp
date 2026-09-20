@@ -97,9 +97,9 @@ tools:
     readonly: true
 
   - tool: execute_sql_query
-    user_goal: 同步执行一条 SQL 并取得 JSON 结果
+    user_goal: 执行一条 SQL 并等待异步任务完成后取得全部 JSON 结果
     documentation: { code: data_api, section: 同步执行 SQL, url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=data_api&anchorId=" }
-    endpoint: /open/execute-sql
+    endpoint: /open/execute-sql + /open/sql-task-info + /open/sql-result-page
     method: POST
     content_type: application/x-www-form-urlencoded
     request_mapping: { sql: sql, fixed_format: "format=json" }

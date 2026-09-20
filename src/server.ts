@@ -64,7 +64,7 @@ export function createServer(config: Config, client = new ThinkingDataClient(con
   }
 
   server.registerTool("execute_sql_query", {
-    description: `Execute one synchronous TA SQL SELECT or WITH query and return JSON results. Pass raw SQL without Markdown code fences. Quote identifiers with double quotes, never backticks. The configured project's event table is ${eventTable} and its user table is ${userTable}; use these exact table names and do not invent, shorten, or otherwise derive table names. Use the metadata tools to confirm event names, properties, and data types before querying.`,
+    description: `Execute one TA SQL SELECT or WITH query and return actual JSON rows. The query may run asynchronously; this tool waits for the task and fetches all result pages. Pass raw SQL without Markdown code fences. Quote identifiers with double quotes, never backticks. The configured project's event table is ${eventTable} and its user table is ${userTable}; use these exact table names and do not invent, shorten, or otherwise derive table names. Use the metadata tools to confirm event names, properties, and data types before querying.`,
     inputSchema: sqlQuerySchema,
     outputSchema: outputShape,
     annotations,
