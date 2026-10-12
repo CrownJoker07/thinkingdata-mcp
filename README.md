@@ -176,6 +176,13 @@ Markdown SQL 代码块中的单条 `SELECT` 或 `WITH … SELECT`，拒绝分号
 写入、DDL、权限变更和过程调用关键字。无法明确判断为只读的 SQL 会被拒绝；
 ThinkingData 查询 token 仍应在服务端配置为只读权限，作为最终安全边界。
 
+SQL 时间字段需要区分日期分区与 UTC 时间：事件表中的 `"$part_date"` 是从
+`"#event_time"` 得到的日期分区值，不自带 UTC/UTC+0 含义。默认情况下项目时区转换关闭，
+查询按上报的原始事件时间计算和展示。若事件记录了有效的 `"#zone_offset"`，它表示事件时间相对
+UTC 的小时偏移，可按 `UTC 时间 = "#event_time" - "#zone_offset"` 换算；缺少或无法确认偏移时，
+不要把 `"$part_date"` 或 `"#event_time"` 标注为 UTC。需要按 UTC 日期分析时，应先确认项目时区配置和
+偏移数据，再使用 UTC 展示时区或按已确认的偏移换算。
+
 TA SQL 使用双引号引用标识符，不支持反引号。MCP 会在 SQL 工具描述中给出当前配置的
 确切事件表 `v_event_<projectId>` 和用户表 `v_user_<projectId>`，不要自行缩写表名，也
 不要假设存在 `default_event` 或 `default_user`；查询前应通过元数据工具确认事件、属性及其数据类型。字符串属性应使用
