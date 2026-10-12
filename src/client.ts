@@ -4,6 +4,8 @@ export type ThinkingDataResponse = {
   return_code: number;
   return_message: string;
   data?: unknown;
+  stackMessage?: string;
+  showStackMessage?: boolean;
 };
 
 const sqlFailure = (code: number, message: string, taskId?: string): ThinkingDataResponse => ({

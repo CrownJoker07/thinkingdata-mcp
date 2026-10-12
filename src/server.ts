@@ -12,6 +12,8 @@ const outputShape = {
   return_code: z.number(),
   return_message: z.string(),
   data: z.unknown().optional(),
+  stackMessage: z.string().optional(),
+  showStackMessage: z.boolean().optional(),
 };
 
 const annotations = { readOnlyHint: true, destructiveHint: false, openWorldHint: false } as const;
@@ -37,6 +39,8 @@ function result(response: ThinkingDataResponse, code: string, endpoint: string) 
     return_code: response.return_code,
     return_message: response.return_message,
     ...(response.data === undefined ? {} : { data: response.data }),
+    ...(response.stackMessage === undefined ? {} : { stackMessage: response.stackMessage }),
+    ...(response.showStackMessage === undefined ? {} : { showStackMessage: response.showStackMessage }),
   };
   return {
     content: [{ type: "text" as const, text: JSON.stringify(structuredContent, null, 2) }],
@@ -65,11 +69,11 @@ export function createServer(config: Config, client = new ThinkingDataClient(con
   }
 
   server.registerTool("execute_sql_query", {
-    description: `Execute one TA SQL SELECT or WITH query and return actual JSON rows. The query may run asynchronously; this tool waits for the task and fetches all result pages. Pass raw SQL without Markdown code fences. Quote identifiers with double quotes, never backticks. The configured project's event table is ${eventTable} and its user table is ${userTable}; use these exact table names and do not invent, shorten, or otherwise derive table names. Use the metadata tools to confirm event names, properties, and data types before querying. ${packageScopeGuidance}`,
+    description: `Execute one TA SQL SELECT or WITH query through ThinkingData's /querySql endpoint and return JSON rows. Pass raw SQL without Markdown code fences. Quote identifiers with double quotes, never backticks. The configured project's event table is ${eventTable} and its user table is ${userTable}; use these exact table names and do not invent, shorten, or otherwise derive table names. Use the metadata tools to confirm event names, properties, and data types before querying. ${packageScopeGuidance}`,
     inputSchema: sqlQuerySchema,
     outputSchema: outputShape,
     annotations,
-  }, async ({ sql }) => result(await client.executeSql(assertReadOnlySql(sql)), "data_api", "/open/execute-sql"));
+  }, async ({ sql }) => result(await client.executeSql(assertReadOnlySql(sql)), "data_api", "/querySql"));
 
   server.registerTool("list_event_metadata", {
     description: "List event metadata for the configured ThinkingData project.",
