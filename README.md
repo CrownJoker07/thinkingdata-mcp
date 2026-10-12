@@ -178,10 +178,12 @@ ThinkingData 查询 token 仍应在服务端配置为只读权限，作为最终
 
 SQL 时间字段需要区分日期分区与 UTC 时间：事件表中的 `"$part_date"` 是从
 `"#event_time"` 得到的日期分区值，不自带 UTC/UTC+0 含义。默认情况下项目时区转换关闭，
-查询按上报的原始事件时间计算和展示。若事件记录了有效的 `"#zone_offset"`，它表示事件时间相对
-UTC 的小时偏移，可按 `UTC 时间 = "#event_time" - "#zone_offset"` 换算；缺少或无法确认偏移时，
-不要把 `"$part_date"` 或 `"#event_time"` 标注为 UTC。需要按 UTC 日期分析时，应先确认项目时区配置和
-偏移数据，再使用 UTC 展示时区或按已确认的偏移换算。
+查询按上报的原始事件时间计算和展示。SQL IDE 报表启用多时区后，可将“事件时间”动态参数设为受时区偏移影响；
+该动态参数筛选时使用 `"$part_date_with_timezone"`，而不是 `"$part_date"`。这是 SQL IDE 报表的动态筛选能力，
+不能据此假定原始 SQL 查询的 `SELECT`/`GROUP BY` 会自动换算，或该字段一定能在原始 SQL 中直接选取。
+本 MCP 直接调用 `/querySql`，没有单次请求的时区参数。若原始 SQL 需要 UTC 时间戳，且事件有有效的
+`"#zone_offset"`，可按 `UTC 时间 = "#event_time" - "#zone_offset"` 换算；偏移为空或未知时不能可靠换算，
+也不能把空值当作 `0`。
 
 TA SQL 使用双引号引用标识符，不支持反引号。MCP 会在 SQL 工具描述中给出当前配置的
 确切事件表 `v_event_<projectId>` 和用户表 `v_user_<projectId>`，不要自行缩写表名，也
