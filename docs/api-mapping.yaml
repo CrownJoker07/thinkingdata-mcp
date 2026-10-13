@@ -1,6 +1,6 @@
 document_version: "5.0"
 language: zh-CN
-last_verified: "2026-08-18"
+last_verified: "2026-10-12"
 base_documentation_url: "https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN"
 
 tools:
@@ -20,11 +20,16 @@ tools:
       filter_relation: eventView.relation
       group_by: eventView.groupBy
       event: events[].eventName
-      metric: events[].analysis
+      metrics: events[].analysis; SUM property: events[].quota
+      display_timezone_offset: zoneOffset (integer hours, -12..14)
+      limit: limit
+      multiple_metrics: useSameResultKey=false
     response_mapping: { return_code: return_code, return_message: return_message, data: data }
     official_enums:
       time_granularity: [minute, minute5, minute10, hour, day, week, month, total]
-      metric: [TOTAL_TIMES, TRIG_USER_NUM, PER_CAPITA_TIMES]
+      metric: [TOTAL_TIMES, TRIG_USER_NUM, PER_CAPITA_TIMES, SUM]
+    limits: { group_limit_default: 1000, group_limit_max: 10000 }
+    timezone: "Requires configured project timezone conversion and event offset property; missing or invalid event offsets are not shifted."
     readonly: true
 
   - tool: query_retention_analysis

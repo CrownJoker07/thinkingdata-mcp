@@ -153,7 +153,7 @@ THINKINGDATA_QUERY_TOKEN
 
 | Tool | 用户目标 | 主要参数形态 |
 | --- | --- | --- |
-| `query_event_analysis` | 查询事件指标趋势 | 指标、时间粒度、筛选、分组 |
+| `query_event_analysis` | 查询事件指标趋势 | 单/多指标、时间粒度、时区、筛选、分组和分组上限 |
 | [`query_retention_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=retention_query_api&anchorId=) | 查询初始事件后的回访留存 | 初始事件、回访事件、时间范围、时间粒度、留存期限、筛选 |
 | [`query_funnel_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=funnel_query_api&anchorId=) | 查询有序步骤转化 | 有序步骤、转化窗口、筛选 |
 | [`query_distribution_analysis`](https://docs-v2.thinkingdata.cn/?version=v5.0&lan=zh-CN&code=distribution_query_api&anchorId=) | 查询事件指标的分布 | 事件、指标、时间范围、时间粒度、筛选 |
@@ -180,7 +180,12 @@ SQL 时间字段需要区分日期分区与 UTC 时间：事件表中的 `"$part
 `"#event_time"` 得到的日期分区值，不自带 UTC/UTC+0 含义。SQL IDE 报表启用多时区后，可将“事件时间”
 动态参数设为受时区偏移影响。这是报表层的动态筛选能力，不是原始 SQL 请求参数。MCP 直接调用 `/querySql`，
 不注入 SQL IDE 动态参数；不要假设原始查询的 `SELECT`/`GROUP BY` 会按展示时区自动换算，也不要在 MCP SQL 中
-尝试使用报表层的内部日期字段。需要平台时区口径时，使用 ThinkingData SQL 报表或分析模型。
+尝试使用报表层的内部日期字段。需要平台时区口径时，可通过 `query_event_analysis` 显式传
+`display_timezone_offset: 0` 请求 UTC+00 日期；这要求项目已启用多时区并配置事件时区偏移属性，缺少或无效偏移的事件不会换算。
+该工具支持单个 `metric`（单项 `SUM` 使用 `metric_property`）或 `metrics` 数组（`SUM` 项使用 `property`），以及
+`limit`（每个分析项最多 10000 组，默认 1000）；多指标请求会让 API 为同名事件结果加序号前缀以避免结果键冲突。
+高基数分组应缩小筛选范围或减少 `group_by` 维度。事件分析 API 的展示时区 `zoneOffset` 和项目事件时区偏移属性按文档使用 -12 到 14 的整数小时；
+用户时区属性才允许包含半小时或 15 分钟的小数值，这不能套用到事件 `#zone_offset`。
 
 MCP 只解析 `/querySql` 返回行，不会删改事件字段。客户端 SDK 可自动采集时区偏移；通过 RESTful API 上报时，
 上报端需要提供偏移信息。若原始 SQL 需要 UTC 时间戳，且事件有有效的 `"#zone_offset"`，可按

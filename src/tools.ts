@@ -30,15 +30,30 @@ export const analysisToolSpecs = {
     path: "/open/event-analyze",
     code: "event_query_api",
     schema: eventAnalysisSchema,
-    map: (input: z.infer<typeof eventAnalysisSchema>, projectId: string) => ({
-      projectId,
-      eventView: {
-        ...mapEventView(input.time_range, input.filters),
-        timeParticleSize: input.time_granularity,
-        ...(input.group_by ? { groupBy: input.group_by.map(mapProperty) } : {}),
-      },
-      events: [{ eventName: input.event.name, analysis: input.metric, type: "normal" }],
-    }),
+    map: (input: z.infer<typeof eventAnalysisSchema>, projectId: string) => {
+      const metrics = "metrics" in input
+        ? input.metrics
+        : input.metric === "SUM"
+          ? [{ aggregation: input.metric, property: input.metric_property }]
+          : [{ aggregation: input.metric }];
+      return {
+        projectId,
+        eventView: {
+          ...mapEventView(input.time_range, input.filters),
+          timeParticleSize: input.time_granularity,
+          ...(input.group_by ? { groupBy: input.group_by.map(mapProperty) } : {}),
+        },
+        events: metrics.map((metric) => ({
+          eventName: input.event.name,
+          analysis: metric.aggregation,
+          type: "normal",
+          ...(metric.aggregation === "SUM" ? { quota: metric.property } : {}),
+        })),
+        ...(metrics.length > 1 ? { useSameResultKey: false } : {}),
+        ...(input.display_timezone_offset === undefined ? {} : { zoneOffset: input.display_timezone_offset }),
+        ...(input.limit === undefined ? {} : { limit: input.limit }),
+      };
+    },
   },
   query_retention_analysis: {
     path: "/open/retention-analyze",

@@ -8,18 +8,39 @@ import {
   timeRangeSchema,
 } from "./common.js";
 
-export const metricSchema = z.enum(["TOTAL_TIMES", "TRIG_USER_NUM", "PER_CAPITA_TIMES"]);
+export const metricSchema = z.enum(["TOTAL_TIMES", "TRIG_USER_NUM", "PER_CAPITA_TIMES", "SUM"]);
 export const distributionMetricSchema = z.enum(["TIMES", "NUMBER_OF_DAYS", "NUMBER_OF_HOURS"]);
 export const timeGranularitySchema = z.enum(["minute", "minute5", "minute10", "hour", "day", "week", "month", "total"]);
 
-export const eventAnalysisSchema = z.object({
+const eventAnalysisBaseSchema = z.object({
   event: eventReferenceSchema,
-  metric: metricSchema,
   time_range: timeRangeSchema,
   time_granularity: timeGranularitySchema,
   filters: z.array(filterSchema).optional(),
   group_by: z.array(groupPropertySchema).optional(),
-}).strict();
+  display_timezone_offset: z.number().int().min(-12).max(14)
+    .describe("Integer UTC offset in hours from -12 to 14; use 0 for UTC+00.").optional(),
+  limit: z.number().int().min(1).max(10000)
+    .describe("Maximum number of groups per analysis, from 1 to 10000; default is 1000.").optional(),
+});
+
+const eventAnalysisMetricSchema = z.union([
+  z.object({ aggregation: z.literal("SUM"), property: z.string().min(1) }).strict(),
+  z.object({ aggregation: z.enum(["TOTAL_TIMES", "TRIG_USER_NUM", "PER_CAPITA_TIMES"]) }).strict(),
+]);
+
+export const eventAnalysisSchema = z.union([
+  eventAnalysisBaseSchema.extend({
+    metric: z.enum(["TOTAL_TIMES", "TRIG_USER_NUM", "PER_CAPITA_TIMES"]),
+  }).strict(),
+  eventAnalysisBaseSchema.extend({
+    metric: z.literal("SUM"),
+    metric_property: z.string().min(1),
+  }).strict(),
+  eventAnalysisBaseSchema.extend({
+    metrics: z.array(eventAnalysisMetricSchema).min(1),
+  }).strict(),
+]);
 
 export const retentionAnalysisSchema = z.object({
   initial_event: eventReferenceSchema,

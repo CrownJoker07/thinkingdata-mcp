@@ -20,7 +20,7 @@ const annotations = { readOnlyHint: true, destructiveHint: false, openWorldHint:
 const packageScopeGuidance = "When querying app data, narrow the scope with an equality filter on the package name or app identifier whenever one is available. Confirm the exact property name with metadata first, and do not run a broad cross-package query unless the user explicitly asks for it.";
 
 const descriptions: Record<keyof typeof analysisToolSpecs, string> = {
-  query_event_analysis: `Query event metrics over time with optional filters and grouping. ${packageScopeGuidance}`,
+  query_event_analysis: `Query event metrics over time with optional filters and grouping. Provide either metric or metrics. A single SUM uses metric_property; metrics entries use aggregation, and SUM entries also require property. For UTC+00 dates, set display_timezone_offset to 0 (an integer from -12 to 14). This requires the project's timezone converter and event offset property to be configured; events with a missing or invalid #zone_offset are not shifted. limit controls groups per analysis, up to 10000 (default 1000); narrow high-cardinality group_by dimensions with filters. ${packageScopeGuidance}`,
   query_retention_analysis: `Query retention from an initial event to a returning event. ${packageScopeGuidance}`,
   query_funnel_analysis: `Query conversion across an ordered sequence of event steps. ${packageScopeGuidance}`,
   query_distribution_analysis: `Query the per-user distribution of an event by TIMES, NUMBER_OF_DAYS, or NUMBER_OF_HOURS, with optional event filters. These metrics do not take a property; use query_event_analysis group_by to break results down by a property. ${packageScopeGuidance}`,
